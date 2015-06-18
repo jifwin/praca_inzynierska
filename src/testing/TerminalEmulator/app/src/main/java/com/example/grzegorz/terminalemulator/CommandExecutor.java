@@ -29,9 +29,15 @@ public class CommandExecutor {
     public CommandExecutor(MainActivity ma) {
         this.registerCommand(Traceroute.class);
         this.registerCommand(Nslookup.class);
+        this.registerCommand(Whois.class);
         this.ma = ma;
     }
 
+    private Command command;
+
+    public void cancelCommand() throws InterruptedException {
+        command.cancel();
+    }
 
     public void executeCommand(final String cmd, final MainActivity ma) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, IOException, InterruptedException {
 
@@ -46,32 +52,44 @@ public class CommandExecutor {
 
                 Constructor ctor = extracommand.getConstructor(String.class);
                 ExtraCommand ec = (ExtraCommand) ctor.newInstance(cmd);
+                command = ec; //todo: refactor?
                 ec.start();
                 return;
             }
         }
 
         //if not execute native command
-        final NativeCommand nc = new NativeCommand(cmd);
+        final NativeCommand nc = new NativeCommand(cmd); //todo :Refactor?
+        command = nc;
+
+
         nc.start();
-        
+
+        Log.d("NATIVE COMAND", "WAITING SYNC");
+
         synchronized (nc) {
             nc.wait();
         }
+        //TU PROBLEM, notify wychodzi dobrze ale notify received dopiero tuz przed skonczeniem procesu
+        Log.d("NATIVE COMMAND", "NOTIFY RECEIVED");
 
 
         final InputStream is = nc.getInputStream();
         final InputStream es = nc.getErrorStream();
         final OutputStream os = nc.getOutputStream();
 
+        Log.d("NATIVE COMMAND STREAMS", is.toString() + es.toString() + os.toString());
+
         final Handler handler = new Handler();
+        final TextView tv = (TextView) ma.findViewById(R.id.textView);
+        final ScrollView sv = (ScrollView) ma.findViewById(R.id.scrollView);
 
         final Runnable r = new Runnable() {
 
             public void run() {
-                TextView tv = (TextView) ma.findViewById(R.id.textView);
-                ScrollView sv = (ScrollView) ma.findViewById(R.id.scrollView);
-                tv.append("\n" + cmd + "\n");
+
+                Log.d("NATIVE COMMAND RUN", "START");
+
                 try {
                     while(is.available() != 0) {
                         char c = (char) is.read();
@@ -88,6 +106,12 @@ public class CommandExecutor {
                     e.printStackTrace();
                 }
 
+                Log.d("NATIVE COMMAND FINISHED", "CALL");
+                try {
+                    Log.d("NATIVE COMMAND FINISHED", nc.allFinished().toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 try {
                     if(!nc.allFinished()) { //if not finished wait for next text
                         handler.postDelayed(this, 10);
@@ -98,6 +122,7 @@ public class CommandExecutor {
             }
         };
 
+        tv.append("\n" + cmd + "\n");
         handler.postDelayed(r,0);
 
 

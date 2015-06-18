@@ -23,6 +23,7 @@ public abstract class Command extends Thread {
     public InputStream getInputStream() {
         return is;
     }
+
     public InputStream getErrorStream() {
         return es;
     }
@@ -31,6 +32,8 @@ public abstract class Command extends Thread {
     }
 
     public abstract Boolean allFinished() throws IOException;
+
+    public void cancel() {};
 
 
 }

@@ -15,7 +15,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:fillViewport="false"
-        android:layout_above="@+id/button">
+        android:layout_above="@+id/executebutton">
 
         <TextView
             android:layout_width="wrap_content"
@@ -36,16 +36,24 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_toLeftOf="@+id/button"
-        android:layout_toStartOf="@+id/button" />
+        android:layout_toLeftOf="@+id/cancelbutton"
+        android:layout_toStartOf="@+id/cancelbutton" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="execute"
-        android:id="@+id/button"
+        android:id="@+id/executebutton"
         android:layout_alignParentBottom="true"
         android:layout_alignRight="@+id/scrollView"
         android:layout_alignEnd="@+id/scrollView" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CANCEL"
+        android:id="@+id/cancelbutton"
+        android:layout_alignBottom="@+id/executebutton"
+        android:layout_toLeftOf="@+id/executebutton" />
 
 </RelativeLayout>

@@ -2,11 +2,14 @@ package com.example.grzegorz.terminalemulator;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import org.apache.commons.net.whois.WhoisClient;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -24,17 +27,35 @@ public class MainActivity extends ActionBarActivity {
         final MainActivity ma = this;
 
 
-        Button bt = (Button) findViewById(R.id.button);
+        Button bt = (Button) findViewById(R.id.executebutton);
+        Button bt2 = (Button) findViewById(R.id.cancelbutton);
         final EditText et = (EditText) findViewById(R.id.editText);
+
+        final CommandExecutor[] ce = new CommandExecutor[1];
+
+        bt2.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                try {
+                    ce[0].cancelCommand(); //refactor?
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
 
-                CommandExecutor ce = new CommandExecutor(ma);
+                ce[0] = new CommandExecutor(ma);
                 try {
 
-                    ce.executeCommand(et.getText().toString(), ma);
+                    ce[0].executeCommand(et.getText().toString(), ma);
+
 
                 } catch (NoSuchMethodException e) {
                     e.printStackTrace();

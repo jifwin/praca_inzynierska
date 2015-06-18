@@ -12,7 +12,6 @@ import java.io.OutputStream;
  */
 public class NativeCommand extends Command {
 
-
     public NativeCommand(String cmd) {
         super(cmd);
 
@@ -27,28 +26,35 @@ public class NativeCommand extends Command {
     }
 
 
+    private Runtime runtime = null;
+    private Process process = null;
+
+    @Override
+    public void cancel() {
+        process.destroy();
+    }
 
 
     @Override
     public void run() {
 
-
-        Runtime runtime = null;
-        Process process = null;
-        synchronized (this) {
-
             runtime = Runtime.getRuntime();
-
 
             try {
                 process = runtime.exec(cmd.split(" "));
                 is = process.getInputStream();
                 es = process.getErrorStream();
                 os = process.getOutputStream();
-                notify();
+                Log.d("NATIVE COMMAND ", "NOTIFY");
+                Log.d("NATIVE COMMAND", is.toString() + es.toString() + os.toString());
+                synchronized (this) {
+                    notify();
+                }
 
                 process.waitFor();
-                System.out.println("koniec procesu");
+
+
+                //System.out.println("koniec procesu");
 
 
             } catch (IOException e) {
@@ -62,7 +68,7 @@ public class NativeCommand extends Command {
                 e.printStackTrace();
             }
 
-        }
+
 
 
 

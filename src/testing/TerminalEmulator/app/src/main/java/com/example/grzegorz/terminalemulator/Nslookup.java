@@ -15,6 +15,8 @@ public class Nslookup extends ExtraCommand {
         return null;
     }
 
+
+
     @Override
     public void run() {
 
