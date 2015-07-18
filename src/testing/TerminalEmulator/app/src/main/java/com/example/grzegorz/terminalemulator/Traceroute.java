@@ -1,5 +1,6 @@
 package com.example.grzegorz.terminalemulator;
 
+import android.app.NativeActivity;
 import android.util.Log;
 
 import java.io.IOException;
@@ -33,6 +34,40 @@ public class Traceroute extends ExtraCommand {
     public void run() {
 
         String[] cmd_parts = cmd.split(" ");
+
+
+        for(int j = 0; j < 15; j++) {
+
+            NativeCommand ping = new NativeCommand("ping -c 1 " + "-t " + j + " " + "89.46.67.140");
+            ping.start();
+
+            synchronized (ping) {
+                try {
+                    ping.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            //todo: implement to only one stream!!!!!!!!! wazne nie tylko w tym tylko wszedzie
+            final InputStream is = ping.getInputStream();
+            final InputStream es = ping.getErrorStream();
+            final OutputStream os = ping.getOutputStream();
+
+            char c;
+            String cale = "";
+            for (int i = 0; i < 125; i++) {
+                try {
+                    c = (char) is.read();
+                    cale += c;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            Log.d("TRACEROUTE", cale);
+
+        }
+
 
     }
 
