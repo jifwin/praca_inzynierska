@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -50,6 +52,30 @@ public class Traceroute extends ExtraCommand {
 
         String[] cmd_parts = cmd.split(" ");
         String dstIP = "89.46.67.140";
+
+        //todo: jak przekazac przez inputstream spowrotem
+
+        //
+
+
+        final int PIPE_BUFFER = 8;
+        PipedInputStream inPipe = new PipedInputStream(PIPE_BUFFER);
+
+        PipedOutputStream outPipe = null;
+        try {
+            outPipe = new PipedOutputStream(inPipe);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        is = inPipe;
+        //todo: sprwadzic czy to zadziala gdy zaimplementuje czytanie z tego a nie z native command tylko
+
+
+
+
+
+        //
+
         for(int j = 1; j < 64; j++) { //todo: specify 64 by parameter
 
             NativeCommand ping = new NativeCommand("ping -c 1 " + "-t " + j + " " + dstIP);
@@ -64,15 +90,15 @@ public class Traceroute extends ExtraCommand {
             }
 
             //todo: implement to only one stream!!!!!!!!! wazne nie tylko w tym tylko wszedzie
-            final InputStream is = ping.getInputStream();
-            final InputStream es = ping.getErrorStream();
-            final OutputStream os = ping.getOutputStream();
+            final InputStream pingIs = ping.getInputStream();
+            final InputStream pingEs = ping.getErrorStream();
+            final OutputStream pingOs = ping.getOutputStream();
 
             String output = "";
             try { //todo: zrobic inaczej? bo malo optymalne
                 while(!ping.allFinished()) {
-                    while(is.available() != 0)  {
-                        output += (char) is.read();
+                    while(pingIs.available() != 0)  {
+                        output += (char) pingIs.read();
                     }
                 }
             } catch (IOException e) {
@@ -80,6 +106,12 @@ public class Traceroute extends ExtraCommand {
             }
 
             String ip = extractIP(output);
+
+            try {
+                outPipe.write(j);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             if(ip.equals(dstIP)) break; //if equals don't ping more
 
 

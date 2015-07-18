@@ -54,6 +54,7 @@ public class CommandExecutor {
                 ExtraCommand ec = (ExtraCommand) ctor.newInstance(cmd);
                 command = ec; //todo: refactor?
                 ec.start();
+                //todo: implement reading from not native comand! PILNE!
                 return;
             }
         }
