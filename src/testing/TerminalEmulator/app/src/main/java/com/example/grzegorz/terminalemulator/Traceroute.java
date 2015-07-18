@@ -30,15 +30,29 @@ public class Traceroute extends ExtraCommand {
         return null;
     }
 
+    private String extractIP(String pingResult) {
+        int fromPosition = pingResult.indexOf("From");
+        int icmpPosition = pingResult.indexOf("icmp_seq");
+        int bytesPosition = pingResult.indexOf("64 bytes"); //only in last ping
+        String ip = "";
+        if (bytesPosition == -1) {
+            ip = pingResult.substring(fromPosition + 5, icmpPosition - 1);
+        }
+        else { //if last
+            ip = pingResult.substring(bytesPosition+14, icmpPosition - 2);
+        }
+        Log.d("TRACEROUTE IP",ip);
+        return ip;
+    }
+
     @Override
     public void run() {
 
         String[] cmd_parts = cmd.split(" ");
+        String dstIP = "89.46.67.140";
+        for(int j = 1; j < 64; j++) { //todo: specify 64 by parameter
 
-
-        for(int j = 0; j < 15; j++) {
-
-            NativeCommand ping = new NativeCommand("ping -c 1 " + "-t " + j + " " + "89.46.67.140");
+            NativeCommand ping = new NativeCommand("ping -c 1 " + "-t " + j + " " + dstIP);
             ping.start();
 
             synchronized (ping) {
@@ -54,17 +68,20 @@ public class Traceroute extends ExtraCommand {
             final InputStream es = ping.getErrorStream();
             final OutputStream os = ping.getOutputStream();
 
-            char c;
-            String cale = "";
-            for (int i = 0; i < 125; i++) {
-                try {
-                    c = (char) is.read();
-                    cale += c;
-                } catch (IOException e) {
-                    e.printStackTrace();
+            String output = "";
+            try { //todo: zrobic inaczej? bo malo optymalne
+                while(!ping.allFinished()) {
+                    while(is.available() != 0)  {
+                        output += (char) is.read();
+                    }
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            Log.d("TRACEROUTE", cale);
+
+            String ip = extractIP(output);
+            if(ip.equals(dstIP)) break; //if equals don't ping more
+
 
         }
 
