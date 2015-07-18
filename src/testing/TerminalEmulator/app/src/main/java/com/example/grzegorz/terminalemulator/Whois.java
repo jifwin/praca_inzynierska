@@ -2,9 +2,14 @@ package com.example.grzegorz.terminalemulator;
 
 import android.util.Log;
 
-import org.apache.commons.net.whois.WhoisClient;
-
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 
 /**
@@ -22,19 +27,32 @@ public class Whois extends ExtraCommand {
 
     @Override
     public void run() {
-        WhoisClient whois;
+        new Thread(new ClientThread()).start();
+    }
 
-        whois = new WhoisClient();
+    class ClientThread implements Runnable {
+        @Override
+        public void run() {
+            try {
+                InetAddress serverAddr = InetAddress.getByName("193.59.201.49");
+                Socket socket = new Socket(serverAddr, 43);
 
-        try {
-            whois.connect(WhoisClient.DEFAULT_HOST);
-
-
-            Log.d("WHOIS", whois.query("foobar"));
-            whois.disconnect();
-        } catch(IOException e) {
-            System.err.println("Error I/O exception: " + e.getMessage());
-            return;
+                InputStream is = socket.getInputStream();
+                OutputStream os = socket.getOutputStream();
+                InputStreamReader isr = new InputStreamReader(is);
+                OutputStreamWriter osw = new OutputStreamWriter(os);
+                osw.write("onet.pl\r\n");
+                osw.flush();
+                char[] buf = new char[512];
+                isr.read(buf);
+                isr.close();
+                osw.close();
+                Log.d("RESPONSE", String.valueOf(buf));
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

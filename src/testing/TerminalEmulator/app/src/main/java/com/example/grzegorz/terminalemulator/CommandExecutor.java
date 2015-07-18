@@ -48,8 +48,8 @@ public class CommandExecutor {
 
         for (Class<? extends ExtraCommand> extracommand: extracommands) {
             String className = extracommand.getName().toLowerCase();
-            if (className.equals(cmd_parts[0])) { // if equals zero argument in cmd (name of command)
-
+            Log.d("RESPONSE",className + " " + cmd_parts[0]);
+            if (className.endsWith(cmd_parts[0])) { // if equals zero argument in cmd (name of command)
                 Constructor ctor = extracommand.getConstructor(String.class);
                 ExtraCommand ec = (ExtraCommand) ctor.newInstance(cmd);
                 command = ec; //todo: refactor?
@@ -57,6 +57,9 @@ public class CommandExecutor {
                 return;
             }
         }
+
+
+        Log.d("RESPONSE","native");
 
         //if not execute native command
         final NativeCommand nc = new NativeCommand(cmd); //todo :Refactor?
